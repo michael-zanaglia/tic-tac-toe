@@ -1,25 +1,35 @@
 from tkinter import *
+from ia import ia
+import random
 
 rond = 1
 croix = 0
 count = 0
 d = {}
 of = True #on/off
-
+try :
+    player = int(input("1. Vous jouez O\n2. Vous jouez X\n3. PvP\n"))
+except :
+    print("Entrez un chiffre entre 1 et 3.")
+state = player
 def start() :
+    global d
     lbout = [boutton1,boutton2,boutton3,boutton4,boutton5,boutton6,boutton7,boutton8,boutton9]
     for x in lbout :
         x.config(state=NORMAL)
     boutton.config(state=DISABLED)
     label_play.config(text="Joueur 1 c'est à vous.")
+    if player == 2 :
+        ia(lbout, d, replace_with_image)
 
 def reset() :
-    global d, rond, croix, count 
+    global d, rond, croix, count, player, state 
     lbout = [boutton1,boutton2,boutton3,boutton4,boutton5,boutton6,boutton7,boutton8,boutton9]
     boutton.config(state=NORMAL)
     rond = 1
     croix = 0
     count = 0
+    player = state
     d = {}
     for x in lbout:
         x.config(image="")
@@ -27,12 +37,12 @@ def reset() :
 
 def start_reset() :
     global of
-    start()
     if of == False :
         reset()
- 
+    start()
+
 def replace_with_image(i):
-    global rond, croix, count, d, of
+    global rond, croix, count, d, of, player
     of = True
     bout = [boutton1,boutton2,boutton3,boutton4,boutton5,boutton6,boutton7,boutton8,boutton9]
     if rond == 1 and croix == 0 :
@@ -40,30 +50,36 @@ def replace_with_image(i):
         bout[i].config(image=img, compound=CENTER, state=DISABLED)
         bout[i].image = img
         d[i] = "rond"
-        gagner()
         rond = 0
         croix = 1
         count += 1
         label_play.config(text="Joueur 2 c'est votre tour.")
+        gagner()
+        if count < 8 and player == 1 :
+            ia(bout, d, replace_with_image)
+        
     else :     
         img = PhotoImage(file=r"croix.png")
         bout[i].config(image=img, compound=CENTER, state=DISABLED)
         bout[i].image = img
         d[i] = "croix"
-        gagner()
         rond = 1
         croix = 0
         count += 1
         label_play.config(text="Joueur 1 c'est à vous.")
-        
+        gagner()
+        if count < 8 and player == 2 :
+            ia(bout, d, replace_with_image)
+            
     if count == 9:
             label_play.config(text="Match Nul !")
             boutton.config(text="Recommencer la partie", state=NORMAL)
             of = False
-    
+    return of
+
 
 def gagner() :
-    global of
+    global of, player
     verif = [
         (0,1,2), (3,4,5), (6,7,8), # lignes
         (0,3,6), (1,4,7), (2,5,8), # colonnes
@@ -83,12 +99,15 @@ def gagner() :
             for j in lbout :
                 j.config(state=DISABLED)
             of = False
+            player = 0
         elif combo_croix == 3 :
             label_play.config(text="Joueur 2 a gagné !")
             boutton.config(text="Recommencer la partie", state=NORMAL)
             for j in lbout :
                 j.config(state=DISABLED)
             of = False
+            player = 0
+        
 
 
 def history(d) :
@@ -100,6 +119,8 @@ def deux_fonc(i) :
     replace_with_image(i)
     gagner()
     history(d)
+    if "Joueur 1 a gagné" in label_play.cget("text") or "Joueur 2 a gagné" in label_play.cget("text"):
+        partie_gagnee = True
         
 #CREATION DE MA FENETRE
 ###################################################################
